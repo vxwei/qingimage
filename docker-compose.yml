@@ -1,0 +1,27 @@
+services:
+  qingimage:
+    build: .
+    image: qingimage:latest
+    container_name: qingimage
+    restart: unless-stopped
+    ports:
+      # 宿主机 8899 -> 容器 8080。前面套域名反代时，把这里改成 "127.0.0.1:8899:8080" 只允许本机访问
+      - "8899:8080"
+    environment:
+      TZ: Asia/Shanghai
+      IMG_DATA_DIR: /data
+      # 首次启动时的管理员密码（之后在管理界面里改；已有数据时改这里无效）
+      IMG_ADMIN_PASSWORD: "change-me-on-first-run"
+      # 对外访问地址（用域名时填，如 https://img.example.com；生成的直链会用它）
+      # IMG_BASE_URL: "https://img.example.com"
+      # 规则参数（默认值即定案方案，需要时改）
+      IMG_MAX_FILE_MB: "10"
+      IMG_GUEST_DAILY: "20"
+      IMG_GUEST_QUOTA_GB: "2"
+      IMG_TOTAL_QUOTA_GB: "10"
+      # 游客上传口令（留空=关闭；填了之后游客要输口令才能传）
+      # IMG_GUEST_PIN: ""
+    volumes:
+      - ./data:/data
+    mem_limit: 256m
+    cpus: 1.0

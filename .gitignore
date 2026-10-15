@@ -1,0 +1,6 @@
+# 运行时数据（图片与索引，不进仓库）
+data/
+# 编译产物
+qingimage
+image-host
+*.exe
