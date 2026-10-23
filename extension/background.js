@@ -33,7 +33,7 @@ chrome.contextMenus.onClicked.addListener(async (info) => {
   if (info.menuItemId !== "qing-upload-image" || !info.srcUrl) return;
   const cfg = await qGetConfig();
   if (!cfg.token) {
-    notify("图床上传助手", "还没有设置 token，先打开扩展设置填入 PicGo token");
+    notify("轻图床助手", "还没有设置 token，先打开扩展设置填入 PicGo token");
     chrome.runtime.openOptionsPage();
     return;
   }

@@ -7,7 +7,7 @@
       "48": "icons/icon48.png"
     },
     "default_popup": "popup.html",
-    "default_title": "上传图片到图床"
+    "default_title": "轻图床助手"
   },
   "background": {
     "service_worker": "background.js"
@@ -23,7 +23,7 @@
     "48": "icons/icon48.png"
   },
   "manifest_version": 3,
-  "name": "图床上传助手",
+  "name": "轻图床助手",
   "optional_host_permissions": [
     "https://*/*"
   ],
