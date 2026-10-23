@@ -19,14 +19,7 @@ function notify(title, message) {
 }
 
 async function copyText(text) {
-  try {
-    await chrome.offscreen.createDocument({
-      url: "offscreen.html",
-      reasons: ["CLIPBOARD"],
-      justification: "把上传后的图片链接复制到剪贴板",
-    });
-  } catch (e) { /* already open */ }
-  return chrome.runtime.sendMessage({ type: "qing-copy", text });
+  return qCopyText(text);
 }
 
 chrome.contextMenus.onClicked.addListener(async (info) => {
@@ -43,8 +36,8 @@ chrome.contextMenus.onClicked.addListener(async (info) => {
     const blob = await resp.blob();
     if (!blob.type.startsWith("image/")) throw new Error("这不是图片");
     const text = await qUploadBlob(blob);
-    await copyText(text);
-    notify("上传成功，链接已复制 ✓", text);
+    if (await copyText(text)) notify("上传成功，链接已复制 ✓", text);
+    else notify("上传成功，但复制失败（链接在下面）", text);
   } catch (e) {
     notify("上传失败", e.message);
   }

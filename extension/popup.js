@@ -13,7 +13,10 @@ function addResult(text) {
   d.className = "result";
   d.textContent = text;
   d.title = "点击复制";
-  d.onclick = () => navigator.clipboard.writeText(text).then(() => setStatus("已复制 ✓", true));
+  d.onclick = async () => {
+    const ok = await qCopyText(text);
+    setStatus(ok ? "已复制 ✓" : "复制失败，请手动选中链接复制", ok);
+  };
   $("#results").prepend(d);
 }
 
@@ -32,8 +35,9 @@ async function handleFiles(files) {
     }
   }
   if (done.length) {
-    await navigator.clipboard.writeText(done.join("\n")).catch(() => {});
-    setStatus(done.length > 1 ? `已上传 ${done.length} 张，链接已全部复制 ✓` : "已上传，链接已复制 ✓", true);
+    const ok = await qCopyText(done.join("\n"));
+    if (ok) setStatus(done.length > 1 ? `已上传 ${done.length} 张，链接已全部复制 ✓` : "已上传，链接已复制 ✓", true);
+    else setStatus("已上传，但自动复制失败——点下面的链接即可复制", false);
   }
 }
 

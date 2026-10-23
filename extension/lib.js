@@ -29,6 +29,37 @@ function qExtForType(type) {
 }
 
 // Upload one Blob/File. Resolves with the formatted link text.
+// Copy text to the clipboard, honestly: resolves true only when a copy
+// actually succeeded. Primary route is the offscreen document (the
+// reliable MV3 channel); local fallbacks run in page contexts.
+async function qCopyText(text) {
+  try {
+    await chrome.offscreen.createDocument({
+      url: "offscreen.html",
+      reasons: ["CLIPBOARD"],
+      justification: "把上传后的图片链接复制到剪贴板",
+    });
+  } catch (e) { /* already open */ }
+  try {
+    const r = await chrome.runtime.sendMessage({ type: "qing-copy", text });
+    if (r && r.ok) return true;
+  } catch (e) { /* no receiver */ }
+  if (typeof document !== "undefined") {
+    try { await navigator.clipboard.writeText(text); return true; } catch (e) {}
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand("copy");
+      ta.remove();
+      if (ok) return true;
+    } catch (e) {}
+  }
+  return false;
+}
+
 async function qUploadBlob(blob, filename) {
   const cfg = await qGetConfig();
   if (!cfg.server) throw new Error("还没有设置图床地址：请先打开扩展的「设置」填入你自己的图床网址和 token");
