@@ -150,9 +150,13 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	// static web UI
+	// static web UI (no-cache so UI updates take effect immediately)
 	sub, _ := fs.Sub(webFS, "web")
-	mux.Handle("GET /", http.FileServer(http.FS(sub)))
+	fileServer := http.FileServer(http.FS(sub))
+	mux.Handle("GET /", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-cache")
+		fileServer.ServeHTTP(w, r)
+	}))
 
 	// public image files
 	mux.HandleFunc("GET /i/", app.serveImage)
