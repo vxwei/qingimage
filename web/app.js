@@ -291,7 +291,7 @@ function openDetail(it, admin) {
     `<span>${escapeHtml(it.orig)}</span><span>${fmtBytes(it.size)}</span>` +
     (it.ts ? `<span>${fmtTime(it.ts)}</span>` : '') +
     (it.owner ? `<span>来源：${it.owner === 'guest' ? '游客' : '管理员'}${it.ip ? ' · ' + escapeHtml(it.ip) : ''}</span>` : '');
-  $('#dtLinks').innerHTML = ['url', 'markdown', 'html', 'bbcode'].map(f =>
+  $('#dtLinks').innerHTML = ['markdown', 'url', 'html', 'bbcode'].map(f =>
     `<div class="kv-row"><span class="kv-k">${{ url: '直链', markdown: 'Markdown', html: 'HTML', bbcode: 'BBCode' }[f]}</span><code>${escapeHtml(linkOf(it, f))}</code><button class="btn btn-small" data-f="${f}">复制</button></div>`).join('');
   $('#dtLinks').querySelectorAll('button').forEach(b => b.onclick = () => copyText(linkOf(it, b.dataset.f)));
   $('#dtDelete').style.display = admin ? '' : 'none';

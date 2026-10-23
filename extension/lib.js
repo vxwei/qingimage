@@ -9,7 +9,7 @@ async function qGetConfig() {
   return {
     server: (d.server || Q_DEFAULT_SERVER).replace(/\/+$/, ""),
     token: d.token || "",
-    format: d.format || "url",
+    format: d.format || "markdown",
   };
 }
 
