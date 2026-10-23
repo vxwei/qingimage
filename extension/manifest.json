@@ -1,1 +1,39 @@
-{"action":{"default_icon":{"128":"icons/icon128.png","16":"icons/icon16.png","32":"icons/icon32.png","48":"icons/icon48.png"},"default_popup":"popup.html","default_title":"上传图片到图床"},"background":{"service_worker":"background.js"},"description":"一键上传图片到自建图床（QingImage），自动复制直链。支持粘贴、拖放、选图与右键传图。","host_permissions":["https://pic.vcdn.win/*"],"icons":{"128":"icons/icon128.png","16":"icons/icon16.png","32":"icons/icon32.png","48":"icons/icon48.png"},"manifest_version":3,"name":"图床上传助手","optional_host_permissions":["https://*/*"],"options_page":"options.html","permissions":["storage","contextMenus","offscreen","clipboardWrite","notifications"],"version":"1.0.0"}
+{
+  "action": {
+    "default_icon": {
+      "128": "icons/icon128.png",
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png"
+    },
+    "default_popup": "popup.html",
+    "default_title": "上传图片到图床"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "description": "一键上传图片到自建图床（QingImage），自动复制直链。支持粘贴、拖放、选图与右键传图。",
+  "host_permissions": [
+    "https://pic.vcdn.win/*"
+  ],
+  "icons": {
+    "128": "icons/icon128.png",
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png"
+  },
+  "manifest_version": 3,
+  "name": "图床上传助手",
+  "optional_host_permissions": [
+    "https://*/*"
+  ],
+  "options_page": "options.html",
+  "permissions": [
+    "storage",
+    "contextMenus",
+    "offscreen",
+    "clipboardWrite",
+    "notifications"
+  ],
+  "version": "1.0"
+}
