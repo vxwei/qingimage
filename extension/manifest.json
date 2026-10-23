@@ -13,9 +13,6 @@
     "service_worker": "background.js"
   },
   "description": "一键上传图片到自建图床（QingImage），自动复制直链。支持粘贴、拖放、选图与右键传图。",
-  "host_permissions": [
-    "https://pic.vcdn.win/*"
-  ],
   "icons": {
     "128": "icons/icon128.png",
     "16": "icons/icon16.png",

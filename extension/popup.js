@@ -59,5 +59,6 @@ $("#openSite").onclick = async () => { const c = await qGetConfig(); chrome.tabs
   const c = await qGetConfig();
   format = c.format;
   $("#fmtSeg").querySelectorAll("button").forEach(x => x.classList.toggle("on", x.dataset.fmt === format));
-  if (!c.token) setStatus("还没有设置 token：点右上角「设置」填入图床后台的 PicGo token", false);
+  if (!c.server) setStatus("还没有设置图床地址：点右上角「设置」填入你自己的图床网址和 token", false);
+  else if (!c.token) setStatus("还没有设置 token：点右上角「设置」填入图床后台的 PicGo token", false);
 })();

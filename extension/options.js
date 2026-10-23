@@ -9,13 +9,12 @@ const $ = s => document.querySelector(s);
 })();
 
 $("#save").onclick = async () => {
-  const server = $("#server").value.trim().replace(/\/+$/, "") || Q_DEFAULT_SERVER;
+  const server = $("#server").value.trim().replace(/\/+$/, "");
   const token = $("#token").value.trim();
   const format = $("#format").value;
-  // Ask for access to a custom server origin while still in the click gesture.
-  if (!server.startsWith(Q_DEFAULT_SERVER)) {
-    try { await chrome.permissions.request({ origins: [server + "/*"] }); } catch (e) { /* user may decline */ }
-  }
+  if (!server) { $("#msg").textContent = "请先填写图床地址"; return; }
+  // Ask for access to the entered server origin while still in the click gesture.
+  try { await chrome.permissions.request({ origins: [server + "/*"] }); } catch (e) { /* user may decline */ }
   await chrome.storage.local.set({ server, token, format });
   $("#msg").textContent = "已保存 ✓";
   setTimeout(() => { $("#msg").textContent = ""; }, 2000);

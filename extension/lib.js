@@ -2,7 +2,7 @@
 // Shared config + upload logic for the QingImage browser extension.
 // Loaded by popup, options and the background service worker (importScripts).
 
-const Q_DEFAULT_SERVER = "https://pic.vcdn.win";
+const Q_DEFAULT_SERVER = "";
 
 async function qGetConfig() {
   const d = await chrome.storage.local.get(["server", "token", "format"]);
@@ -31,6 +31,7 @@ function qExtForType(type) {
 // Upload one Blob/File. Resolves with the formatted link text.
 async function qUploadBlob(blob, filename) {
   const cfg = await qGetConfig();
+  if (!cfg.server) throw new Error("还没有设置图床地址：请先打开扩展的「设置」填入你自己的图床网址和 token");
   if (!cfg.token) throw new Error("还没有设置 token：请先打开扩展的「设置」填入图床后台的 PicGo token");
   const name = filename || ("image-" + Date.now() + qExtForType(blob.type));
   const fd = new FormData();
