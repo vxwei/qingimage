@@ -103,7 +103,9 @@ code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-s
 .img-card img.thumb{width:100%;height:128px;object-fit:cover;display:block;cursor:zoom-in;background:var(--surface2)}
 .img-meta{padding:9px 11px}
 .img-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.img-sub{font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.img-sub{font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:nowrap}
+.badge-guest{background:#fef3c7;color:#92400e;border-radius:6px;padding:0 6px;font-size:11px;font-weight:700;flex:none;line-height:1.6}
+html[data-theme="dark"] .badge-guest{background:#3a2c10;color:#fbbf24}
 .img-actions{display:flex;gap:6px;padding:0 11px 11px}
 .img-actions .btn{flex:1;padding:5px 0;font-size:12.5px}
 .btn-del{color:var(--danger);flex:0 0 40px!important}
