@@ -44,10 +44,6 @@ function fmtTime(ts) {
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') +
     ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
 }
-function fmtCardTime(ts) {
-  const d = new Date(ts * 1000);
-  return String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-}
 function linkOf(item, f) {
   if (f === 'markdown') return item.markdown || `![${item.orig}](${item.url})`;
   if (f === 'html') return `<img src="${item.url}" alt="${item.orig}">`;
@@ -253,8 +249,8 @@ async function loadGallery(append) {
       <img class="thumb" src="${it.url}" alt="" loading="lazy" data-act="zoom" data-i="${i}">
       <div class="img-meta">
         <div class="img-name" title="${escapeHtml(it.orig)}">${escapeHtml(it.orig)}</div>
-        <div class="img-sub"><span>${fmtBytes(it.size)}</span><span>${fmtCardTime(it.ts)}</span>
-        ${it.owner === 'guest' ? '<span class="badge-guest">游客</span>' : ''}</div>
+        <div class="img-sub"><span>${fmtBytes(it.size)}</span><span>${fmtTime(it.ts)}</span></div>
+        ${it.owner === 'guest' ? '<div class="img-owner"><span class="badge-guest">游客</span></div>' : ''}
       </div>
       <div class="img-actions">
         <button class="btn" data-act="copy" data-i="${i}">复制</button>
