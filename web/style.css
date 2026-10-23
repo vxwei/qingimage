@@ -150,6 +150,7 @@ html[data-theme="dark"] .badge-admin{background:#3a1212;color:#f87171}
 .foot{text-align:center;color:var(--muted);font-size:12.5px;padding:6px 0 2px}
 .foot a{color:var(--muted);text-decoration:underline;text-underline-offset:2px}
 .foot a:hover{color:var(--accent)}
+.foot .gh-ico{width:13px;height:13px;vertical-align:-2px;margin-right:4px}
 
 /* modal */
 .modal{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:18px}
