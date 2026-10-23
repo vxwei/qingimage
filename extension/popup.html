@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div id="drop">
+    <div class="big">🖼️</div>
+    <div>点击选图 · 拖放到这里 · Ctrl+V 粘贴</div>
+    <div class="hint">上传到你的图床，链接自动复制</div>
+  </div>
+  <input type="file" id="file" accept="image/*" multiple hidden>
+  <div class="row">
+    <div class="seg" id="fmtSeg">
+      <button data-fmt="url" class="on">直链</button>
+      <button data-fmt="markdown">Markdown</button>
+      <button data-fmt="html">HTML</button>
+    </div>
+    <span class="spacer"></span>
+    <button class="link" id="openOptions">设置</button>
+    <button class="link" id="openSite">打开图床</button>
+  </div>
+  <div id="status"></div>
+  <div id="results"></div>
+  <script src="lib.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

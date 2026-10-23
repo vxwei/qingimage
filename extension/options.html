@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>图床上传助手 · 设置</title>
+<style>
+  body{font:14px/1.6 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif;max-width:520px;margin:32px auto;padding:0 16px;color:#1f2430}
+  @media (prefers-color-scheme:dark){body{background:#171a21;color:#e8eaf0}}
+  label{display:block;font-size:13px;color:#8a90a6;margin:16px 0 4px}
+  input,select{width:100%;padding:9px 10px;border:1px solid #c6ccdd;border-radius:8px;background:transparent;color:inherit;font-size:14px}
+  button{margin-top:20px;background:#4f46e5;color:#fff;border:0;border-radius:8px;padding:9px 22px;font-size:14px;cursor:pointer}
+  .hint{font-size:12.5px;color:#8a90a6;margin-top:6px}
+  #msg{margin-top:12px;font-size:13px}
+</style>
+</head>
+<body>
+  <h2>图床上传助手 · 设置</h2>
+  <label>图床地址</label>
+  <input id="server" placeholder="https://pic.vcdn.win">
+  <label>PicGo token</label>
+  <input id="token" placeholder="在图床网页后台「PicGo 接口」处查看">
+  <div class="hint">token 只保存在浏览器本地，上传时以管理员身份传图。</div>
+  <label>默认复制格式</label>
+  <select id="format">
+    <option value="url">直链</option>
+    <option value="markdown">Markdown</option>
+    <option value="html">HTML</option>
+  </select>
+  <button id="save">保存</button>
+  <div id="msg"></div>
+  <script src="lib.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>
