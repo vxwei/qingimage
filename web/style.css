@@ -107,6 +107,8 @@ code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-s
 .img-owner{margin-top:5px}
 .badge-guest{background:#fef3c7;color:#92400e;border-radius:6px;padding:0 6px;font-size:11px;font-weight:700;line-height:1.6;display:inline-block}
 html[data-theme="dark"] .badge-guest{background:#3a2c10;color:#fbbf24}
+.badge-admin{background:#fee2e2;color:#991b1b;border-radius:6px;padding:0 6px;font-size:11px;font-weight:700;line-height:1.6;display:inline-block}
+html[data-theme="dark"] .badge-admin{background:#3a1212;color:#f87171}
 .img-actions{display:flex;gap:6px;padding:0 11px 11px}
 .img-actions .btn{flex:1;padding:5px 0;font-size:12.5px}
 .btn-del{color:var(--danger);flex:0 0 40px!important}

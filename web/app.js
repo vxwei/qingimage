@@ -250,7 +250,7 @@ async function loadGallery(append) {
       <div class="img-meta">
         <div class="img-name" title="${escapeHtml(it.orig)}">${escapeHtml(it.orig)}</div>
         <div class="img-sub"><span>${fmtBytes(it.size)}</span><span>${fmtTime(it.ts)}</span></div>
-        ${it.owner === 'guest' ? '<div class="img-owner"><span class="badge-guest">游客</span></div>' : ''}
+        ${it.owner === 'guest' ? '<div class="img-owner"><span class="badge-guest">游客</span></div>' : it.owner === 'admin' ? '<div class="img-owner"><span class="badge-admin">管理员</span></div>' : ''}
       </div>
       <div class="img-actions">
         <button class="btn" data-act="copy" data-i="${i}">复制</button>
