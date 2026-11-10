@@ -18,6 +18,15 @@
 默认限制：只收图片（jpg/png/gif/webp/avif/bmp/ico，不收 SVG），单张 ≤ 10MB，
 单 IP 每天 ≤ 20 张，游客配额 2GB、总量 10GB。
 
+## 下载编译好的二进制（不用自己编译）
+
+- Linux x86_64（VPS）：[qingimage-linux-amd64](https://github.com/vxwei/qingimage/releases/download/v1.0/qingimage-linux-amd64)
+- Linux ARM64（ARM 小鸡）：[qingimage-linux-arm64](https://github.com/vxwei/qingimage/releases/download/v1.0/qingimage-linux-arm64)
+- FreeBSD x86_64（Serv00）：[qingimage-freebsd-amd64](https://github.com/vxwei/qingimage/releases/download/v1.0/qingimage-freebsd-amd64)
+- 校验值：[SHA256SUMS.txt](https://github.com/vxwei/qingimage/releases/download/v1.0/SHA256SUMS.txt)
+
+下载后 `chmod +x` 就能跑，不用装 Go。
+
 ## 方式一：VPS（Docker，5 分钟）
 
 需要一台 Linux 服务器（1 核 1G、20G 硬盘就够）和它的公网 IP。
@@ -41,6 +50,7 @@ docker compose up -d --build
 打开 `http://服务器IP:8899`，点「管理员登录」输密码，登录后在页面底部改一次密码，
 在「PicGo / API」里拿 token。能传图就成了。
 
+> 不想用 Docker？直接下载上面那个 Linux 二进制，`chmod +x` 后设好环境变量就能跑，见下面折叠区「二进制部署」。
 > 打不开？先跑 `docker compose ps`（状态要是 `Up`）和 `docker compose logs --tail 50` 看报错；
 > 云服务器还要在安全组放行 8899 端口。
 
@@ -50,9 +60,10 @@ docker compose up -d --build
 没有 root、没有 systemd、没有 Docker，所以要多做两步。
 
 ```bash
-# 1. 在自己电脑上编一个 FreeBSD 版（图床是纯 Go，不用改代码）
-GOOS=freebsd GOARCH=amd64 CGO_ENABLED=0 go build -o image-host .
-# 把编好的 image-host 用 SFTP 传到 Serv00，比如 ~/image-host/
+# 1. 在 Serv00 上直接下载 FreeBSD 版，不用自己编译
+mkdir -p ~/image-host && cd ~/image-host
+curl -LO https://github.com/vxwei/qingimage/releases/download/v1.0/qingimage-freebsd-amd64
+chmod +x qingimage-freebsd-amd64
 ```
 
 2. 在 Serv00 面板里预留一个端口（每户最多 3 个，1024–64000），
@@ -69,7 +80,7 @@ export IMG_ADMIN_PASSWORD=你的密码
 export IMG_TOTAL_QUOTA_GB=2
 export IMG_GUEST_QUOTA_GB=1
 export IMG_BIND=127.0.0.1
-exec $HOME/image-host/image-host
+exec $HOME/image-host/qingimage-freebsd-amd64
 ```
 
 ```bash
@@ -81,7 +92,7 @@ chmod +x ~/image-host/start.sh
    `crontab -e` 加一行，每 5 分钟查一次，没了就拉起来：
 
 ```cron
-*/5 * * * * pgrep -x image-host >/dev/null || $HOME/image-host/start.sh >> $HOME/image-host/image-host.log 2>&1
+*/5 * * * * pgrep -x qingimage-freebsd-amd64 >/dev/null || $HOME/image-host/start.sh >> $HOME/image-host/image-host.log 2>&1
 ```
 
 打开 proxy 网站的域名，点「管理员登录」输密码，登录后在页面底部改一次密码，
@@ -125,10 +136,10 @@ server {
 <summary>不用 Docker：直接跑二进制</summary>
 
 ```bash
-git clone https://github.com/vxwei/qingimage.git
-cd qingimage
-go build -o image-host .   # 需要 Go 1.27+
-IMG_ADMIN_PASSWORD=你的密码 IMG_DATA_DIR=./data IMG_PORT=8899 ./image-host
+# 直接下载编译好的（不用装 Go）：https://github.com/vxwei/qingimage/releases/download/v1.0/qingimage-linux-amd64
+# ARM 用 qingimage-linux-arm64；想自己编就 git clone 仓库再 go build -o image-host .（需要 Go 1.27+）
+chmod +x qingimage-linux-amd64
+IMG_ADMIN_PASSWORD=你的密码 ./qingimage-linux-amd64   # 监听 8080 端口
 ```
 
 想开机自启就用 systemd 托管，`ExecStart` 指到二进制、再 `systemctl enable --now image-host`；
