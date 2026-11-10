@@ -18,7 +18,7 @@
 默认限制：只收图片（jpg/png/gif/webp/avif/bmp/ico，不收 SVG），单张 ≤ 10MB，
 单 IP 每天 ≤ 20 张，游客配额 2GB、总量 10GB。
 
-## 快速开始（Docker，5 分钟）
+## 方式一：VPS（Docker，5 分钟）
 
 需要一台 Linux 服务器（1 核 1G、20G 硬盘就够）和它的公网 IP。
 
@@ -43,6 +43,54 @@ docker compose up -d --build
 
 > 打不开？先跑 `docker compose ps`（状态要是 `Up`）和 `docker compose logs --tail 50` 看报错；
 > 云服务器还要在安全组放行 8899 端口。
+
+## 方式二：Serv00（免费共享主机）
+
+没有 VPS 也可以装，适合个人轻量用、做备用图床。Serv00 是 FreeBSD，
+没有 root、没有 systemd、没有 Docker，所以要多做两步。
+
+```bash
+# 1. 在自己电脑上编一个 FreeBSD 版（图床是纯 Go，不用改代码）
+GOOS=freebsd GOARCH=amd64 CGO_ENABLED=0 go build -o image-host .
+# 把编好的 image-host 用 SFTP 传到 Serv00，比如 ~/image-host/
+```
+
+2. 在 Serv00 面板里预留一个端口（每户最多 3 个，1024–64000），
+   再新建一个 proxy 类型的网站，代理到 `localhost:预留端口`，
+   证书在面板里直接签 Let's Encrypt。
+
+3. 在 Serv00 上新建一个启动脚本 `~/image-host/start.sh`：
+
+```bash
+#!/bin/sh
+export IMG_PORT=预留端口
+export IMG_DATA_DIR=$HOME/image-host-data
+export IMG_ADMIN_PASSWORD=你的密码
+export IMG_TOTAL_QUOTA_GB=2
+export IMG_GUEST_QUOTA_GB=1
+export IMG_BIND=127.0.0.1
+exec $HOME/image-host/image-host
+```
+
+```bash
+chmod +x ~/image-host/start.sh
+~/image-host/start.sh &
+```
+
+4. 保活：Serv00 没有 systemd，进程死了不会自己起来。
+   `crontab -e` 加一行，每 5 分钟查一次，没了就拉起来：
+
+```cron
+*/5 * * * * pgrep -x image-host >/dev/null || $HOME/image-host/start.sh >> $HOME/image-host/image-host.log 2>&1
+```
+
+打开 proxy 网站的域名，点「管理员登录」输密码，登录后在页面底部改一次密码，
+在「PicGo / API」里拿 token。
+
+> 注意：免费号只有 3GB 盘，所以上面把总量改成了 2GB、游客池 1GB；
+> 数据目录（`image-host-data`）要放在网站根目录之外。
+> 还有一点要实测：游客限流靠真实 IP，代理没带 `X-Forwarded-For` 的话，
+> 所有访客会被当成同一个 IP。
 
 ## 域名 + HTTPS（可选）
 
