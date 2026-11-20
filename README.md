@@ -1,9 +1,10 @@
-# QingImage
+# 轻图床（image-host）
 
-轻量个人图床：Go 单二进制、零外部依赖。游客免登录即可上传，管理员登录后管理图库。
+为 GDD 定制的轻量个人图床：Go 单二进制、无外部依赖。
 
-- 二进制约 7 MB，空载内存约 10 MB，适合在 2C/2G 的小机器上与其它服务共存
+- 二进制约 7 MB，空载内存约 10 MB，适合与 Mailu、Komari 共用一台 2C/2G 小机器
 - 图片存本地磁盘 `data/uploads/年/月/日/`，元数据在 `data/index.json`，备份 = 复制 `data/` 目录
+- 上传前可打马赛克：打开「上传前打马赛克」开关后，单张图片先在浏览器里框选打码再上传，原图不出设备（GIF 动图不支持，多张直接上传）
 
 ## 权限规则
 
@@ -20,10 +21,10 @@
 
 ## 下载编译好的二进制（不用自己编译）
 
-- Linux x86_64（VPS）：[qingimage-linux-amd64](https://github.com/vxwei/qingimage/releases/download/v1.0/qingimage-linux-amd64)
-- Linux ARM64（ARM 小鸡）：[qingimage-linux-arm64](https://github.com/vxwei/qingimage/releases/download/v1.0/qingimage-linux-arm64)
-- FreeBSD x86_64（Serv00）：[qingimage-freebsd-amd64](https://github.com/vxwei/qingimage/releases/download/v1.0/qingimage-freebsd-amd64)
-- 校验值：[SHA256SUMS.txt](https://github.com/vxwei/qingimage/releases/download/v1.0/SHA256SUMS.txt)
+- Linux x86_64（VPS）：[qingimage-linux-amd64](https://github.com/vxwei/qingimage/releases/download/v1.1/qingimage-linux-amd64)
+- Linux ARM64（ARM 小鸡）：[qingimage-linux-arm64](https://github.com/vxwei/qingimage/releases/download/v1.1/qingimage-linux-arm64)
+- FreeBSD x86_64（Serv00）：[qingimage-freebsd-amd64](https://github.com/vxwei/qingimage/releases/download/v1.1/qingimage-freebsd-amd64)
+- 校验值：[SHA256SUMS.txt](https://github.com/vxwei/qingimage/releases/download/v1.1/SHA256SUMS.txt)
 
 下载后 `chmod +x` 就能跑，不用装 Go。
 
@@ -62,7 +63,7 @@ docker compose up -d --build
 ```bash
 # 1. 在 Serv00 上直接下载 FreeBSD 版，不用自己编译
 mkdir -p ~/image-host && cd ~/image-host
-curl -LO https://github.com/vxwei/qingimage/releases/download/v1.0/qingimage-freebsd-amd64
+curl -LO https://github.com/vxwei/qingimage/releases/download/v1.1/qingimage-freebsd-amd64
 chmod +x qingimage-freebsd-amd64
 ```
 
@@ -136,7 +137,7 @@ server {
 <summary>不用 Docker：直接跑二进制</summary>
 
 ```bash
-# 直接下载编译好的（不用装 Go）：https://github.com/vxwei/qingimage/releases/download/v1.0/qingimage-linux-amd64
+# 直接下载编译好的（不用装 Go）：https://github.com/vxwei/qingimage/releases/download/v1.1/qingimage-linux-amd64
 # ARM 用 qingimage-linux-arm64；想自己编就 git clone 仓库再 go build -o image-host .（需要 Go 1.27+）
 chmod +x qingimage-linux-amd64
 IMG_ADMIN_PASSWORD=你的密码 ./qingimage-linux-amd64   # 监听 8080 端口

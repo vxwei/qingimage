@@ -75,6 +75,11 @@ syncFmtGroups();
 $('#autoCopy').checked = localStorage.getItem('ih_autocopy') === '1';
 $('#autoCopy').onchange = e => localStorage.setItem('ih_autocopy', e.target.checked ? '1' : '0');
 
+// 上传前打马赛克开关（记在本浏览器里）
+let mosaicOn = localStorage.getItem('ih_mosaic') === '1';
+$('#mosaicToggle').checked = mosaicOn;
+$('#mosaicToggle').onchange = e => { mosaicOn = e.target.checked; localStorage.setItem('ih_mosaic', mosaicOn ? '1' : '0'); };
+
 // ---------- session uploads ----------
 function renderSession() {
   const card = $('#sessionCard');
@@ -115,22 +120,29 @@ fi.onchange = () => { handleFiles([...fi.files]); fi.value = ''; };
 function handleFiles(files) {
   files = files.filter(f => f.size > 0);
   if (!files.length) return;
+  // 单张静态图 + 开了打码开关 → 先进打码编辑器；多张、动图直接上传
+  if (mosaicOn && files.length === 1 && isMosaicable(files[0])) {
+    openMosaic(files[0]).catch(() => { toast('图片读取失败，已直接上传'); enqueueFile(files[0]); });
+    return;
+  }
+  files.forEach(enqueueFile);
+}
+
+function enqueueFile(f) {
   const maxMB = ME.limits.max_file_mb || 10;
-  files.forEach(f => {
-    const row = document.createElement('div');
-    row.className = 'q-item';
-    row.innerHTML = `<img class="q-thumb" alt=""><div class="q-main"><div class="q-name">${escapeHtml(f.name || '剪贴板图片')}</div><div class="q-bar"><i></i></div></div><span class="q-state">上传中…</span>`;
-    const thumb = row.querySelector('.q-thumb');
-    if (f.type.startsWith('image/')) thumb.src = URL.createObjectURL(f);
-    $('#queue').prepend(row);
-    if (f.size > maxMB * 1024 * 1024) {
-      row.querySelector('.q-state').textContent = '超过 ' + maxMB + ' MB';
-      row.querySelector('.q-state').classList.add('fail');
-      row.querySelector('.q-bar i').style.width = '0';
-      return;
-    }
-    uploadOne(f, row);
-  });
+  const row = document.createElement('div');
+  row.className = 'q-item';
+  row.innerHTML = `<img class="q-thumb" alt=""><div class="q-main"><div class="q-name">${escapeHtml(f.name || '剪贴板图片')}</div><div class="q-bar"><i></i></div></div><span class="q-state">上传中…</span>`;
+  const thumb = row.querySelector('.q-thumb');
+  if (f.type.startsWith('image/')) thumb.src = URL.createObjectURL(f);
+  $('#queue').prepend(row);
+  if (f.size > maxMB * 1024 * 1024) {
+    row.querySelector('.q-state').textContent = '超过 ' + maxMB + ' MB';
+    row.querySelector('.q-state').classList.add('fail');
+    row.querySelector('.q-bar i').style.width = '0';
+    return;
+  }
+  uploadOne(f, row);
 }
 
 function uploadOne(file, row) {
@@ -169,9 +181,150 @@ function uploadOne(file, row) {
   xhr.send(fd);
 }
 
+// ---------- mosaic：上传前在浏览器里打码，原图不出设备 ----------
+let mz = null; // {file, bitmap, rects, size, scale, cv, ctx, drag}
+
+function isMosaicable(f) {
+  // 只处理静态图；GIF 动图、AVIF 不进编辑器，直接上传
+  return ['image/jpeg', 'image/png', 'image/webp', 'image/bmp'].includes(f.type);
+}
+
+async function openMosaic(file) {
+  let bitmap;
+  try {
+    bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+  } catch {
+    const url = URL.createObjectURL(file);
+    bitmap = await new Promise((res, rej) => {
+      const im = new Image();
+      im.onload = () => res(im);
+      im.onerror = rej;
+      im.src = url;
+    });
+  }
+  const cv = $('#mosaicCanvas');
+  const scale = Math.min(1, 820 / bitmap.width, Math.round(innerHeight * 0.6) / bitmap.height);
+  cv.width = Math.max(1, Math.round(bitmap.width * scale));
+  cv.height = Math.max(1, Math.round(bitmap.height * scale));
+  mz = { file, bitmap, rects: [], size: +$('#mosaicSize').value || 16, scale, cv, ctx: cv.getContext('2d'), drag: null };
+  updateMosaicCount();
+  drawMosaic();
+  $('#mosaicModal').classList.remove('hidden');
+}
+
+function closeMosaic() {
+  $('#mosaicModal').classList.add('hidden');
+  if (mz && mz.bitmap && mz.bitmap.close) mz.bitmap.close();
+  mz = null;
+}
+
+// 把 (sx,sy,sw,sh) 这块区域打成马赛克：先缩成小图再放大，关掉平滑就是颗粒
+function pixelateRegion(ctx, sx, sy, sw, sh, block) {
+  if (sw < 2 || sh < 2) return;
+  const bw = Math.max(1, Math.round(sw / block)), bh = Math.max(1, Math.round(sh / block));
+  const tmp = document.createElement('canvas');
+  tmp.width = bw; tmp.height = bh;
+  const tctx = tmp.getContext('2d');
+  tctx.drawImage(ctx.canvas, sx, sy, sw, sh, 0, 0, bw, bh);
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(tmp, 0, 0, bw, bh, sx, sy, sw, sh);
+  ctx.imageSmoothingEnabled = true;
+}
+
+function drawMosaic() {
+  if (!mz) return;
+  const { ctx, cv, bitmap, rects, size } = mz;
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  ctx.drawImage(bitmap, 0, 0, cv.width, cv.height);
+  ctx.lineWidth = 2;
+  rects.forEach(r => {
+    pixelateRegion(ctx, r.x, r.y, r.w, r.h, size);
+    ctx.strokeStyle = 'rgba(220,38,38,.9)';
+    ctx.strokeRect(r.x + 1, r.y + 1, r.w - 2, r.h - 2);
+  });
+  if (mz.drag) {
+    const r = normRect(mz.drag);
+    ctx.strokeStyle = 'rgba(220,38,38,.9)';
+    ctx.setLineDash([6, 4]);
+    ctx.strokeRect(r.x, r.y, r.w, r.h);
+    ctx.setLineDash([]);
+  }
+}
+
+function updateMosaicCount() {
+  $('#mosaicCount').textContent = '已框 ' + (mz ? mz.rects.length : 0) + ' 处';
+}
+
+function canvasPos(e) {
+  const cv = $('#mosaicCanvas');
+  const r = cv.getBoundingClientRect();
+  return { x: (e.clientX - r.left) * (cv.width / r.width), y: (e.clientY - r.top) * (cv.height / r.height) };
+}
+
+function normRect(d) {
+  return {
+    x: Math.round(Math.min(d.x0, d.x)), y: Math.round(Math.min(d.y0, d.y)),
+    w: Math.round(Math.abs(d.x - d.x0)), h: Math.round(Math.abs(d.y - d.y0))
+  };
+}
+
+$('#mosaicCanvas').addEventListener('pointerdown', e => {
+  if (!mz) return;
+  e.preventDefault();
+  $('#mosaicCanvas').setPointerCapture(e.pointerId);
+  const p = canvasPos(e);
+  mz.drag = { x0: p.x, y0: p.y, x: p.x, y: p.y };
+});
+$('#mosaicCanvas').addEventListener('pointermove', e => {
+  if (!mz || !mz.drag) return;
+  const p = canvasPos(e);
+  mz.drag.x = p.x; mz.drag.y = p.y;
+  drawMosaic();
+});
+$('#mosaicCanvas').addEventListener('pointerup', e => {
+  if (!mz || !mz.drag) return;
+  const r = normRect(mz.drag);
+  mz.drag = null;
+  if (r.w >= 8 && r.h >= 8) { mz.rects.push(r); updateMosaicCount(); }
+  drawMosaic();
+});
+$('#mosaicSize').oninput = e => {
+  $('#mosaicSizeVal').textContent = e.target.value + 'px';
+  if (mz) { mz.size = +e.target.value; drawMosaic(); }
+};
+$('#mosaicUndo').onclick = () => { if (mz) { mz.rects.pop(); updateMosaicCount(); drawMosaic(); } };
+$('#mosaicClear').onclick = () => { if (mz) { mz.rects = []; updateMosaicCount(); drawMosaic(); } };
+$('#mosaicClose').onclick = closeMosaic;
+$('#mosaicBack').onclick = closeMosaic;
+$('#mosaicSkip').onclick = () => { if (!mz) return; const f = mz.file; closeMosaic(); enqueueFile(f); };
+$('#mosaicApply').onclick = async () => {
+  if (!mz) return;
+  const { file, bitmap, rects, size, scale } = mz;
+  if (!rects.length) { closeMosaic(); enqueueFile(file); return; }
+  // 全分辨率渲染：显示用的颗粒按比例放大到原图尺寸
+  const full = document.createElement('canvas');
+  full.width = bitmap.width; full.height = bitmap.height;
+  const fctx = full.getContext('2d');
+  fctx.drawImage(bitmap, 0, 0);
+  rects.forEach(r => {
+    pixelateRegion(fctx,
+      Math.round(r.x / scale), Math.round(r.y / scale),
+      Math.round(r.w / scale), Math.round(r.h / scale),
+      Math.max(2, Math.round(size / scale)));
+  });
+  const isPng = file.type === 'image/png';
+  const type = isPng ? 'image/png' : 'image/jpeg';
+  const blob = await new Promise(res => full.toBlob(res, type, 0.92));
+  if (!blob) { toast('处理失败，请直接上传'); closeMosaic(); enqueueFile(file); return; }
+  const name = file.name.replace(/\.[^.]+$/, '') + (isPng ? '.png' : '.jpg');
+  const out = new File([blob], name, { type });
+  closeMosaic();
+  enqueueFile(out);
+};
+
 // ---------- auth ----------
 function openLogin() { $('#loginModal').classList.remove('hidden'); $('#loginErr').classList.add('hidden'); setTimeout(() => $('#loginPwd').focus(), 50); }
-function closeModals() { $$('.modal').forEach(m => m.classList.add('hidden')); }
+function closeModals() { $$('.modal').forEach(m => m.classList.add('hidden')); if (mz) closeMosaic(); }
 $$('[data-close]').forEach(el => el.onclick = closeModals);
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModals(); });
 $('#loginBtn').onclick = openLogin;

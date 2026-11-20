@@ -169,5 +169,15 @@ html[data-theme="dark"] .badge-admin{background:#3a1212;color:#f87171}
 
 /* toast */
 .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#17181c;color:#f4f4f5;padding:10px 18px;border-radius:11px;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,.3);z-index:120}
+
+/* mosaic editor */
+.modal-mosaic{max-width:860px}
+.mosaic-wrap{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface2);display:grid;place-items:center}
+.mosaic-wrap canvas{max-width:100%;max-height:62vh;display:block;touch-action:none;cursor:crosshair}
+.mosaic-tools{display:flex;align-items:center;gap:14px;margin-top:12px;flex-wrap:wrap;color:var(--muted);font-size:13.5px}
+.mosaic-size{display:flex;align-items:center;gap:8px}
+.mosaic-size input{width:150px}
+.mosaic-actions{display:flex;gap:8px;margin-top:14px;align-items:center}
+.mosaic-spacer{flex:1}
 html[data-theme="dark"] .toast{background:#f4f4f5;color:#17181c}
 @media(max-width:560px){.stats{grid-template-columns:1fr 1fr}.stat-value{font-size:20px}.guest-note{flex-direction:column;align-items:flex-start}}
